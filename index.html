@@ -6,35 +6,43 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
-  <title>Search Algorithms</title>
+  <title>Search Algorithms - Home</title>
 </head>
 <body>
   <nav>
     <div class="logo">SearchAlgorithms</div>
     <ul class="nav-links">
-      <li><a href="#">Home</a></li>
-      <li><a href="#">Maps</a></li>
-      <li><a href="#">Github</a></li>
-      <li><a href="#">About</a></li>
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="maps.html">Maps</a></li>
+      <li><a href="github.html">Github</a></li>
+      <li><a href="about.html">About</a></li>
     </ul>
   </nav>
 
-  <div class="chat-container">
-    <div class="input-wrapper">
-      <input id="query" type="text" class="chat-input" placeholder="Type your query...">
-      <button id="sendBtn" class="send-btn" title="Send">
-        <i class="fas fa-paper-plane"></i>
-      </button>
-    </div>
+  <div class="page-content">
+    <h2>Welcome to SearchAlgorithms</h2>
+    <p>This interactive tool demonstrates various Artificial Intelligence **Search Algorithms** by finding paths between cities on a simplified map of Romania.</p>
+    <p>Navigate to the **Maps** section to run a search query (e.g., 'Find path from Arad to Bucharest using A*').</p>
+    
+    <h3>Search Algorithm Breakdown</h3>
+    <p>We visualize both **Uninformed (Blind)** and **Informed (Heuristic)** search strategies:</p>
+    <ul>
+      <li>**Uninformed Search**: Algorithms that explore the search space without any domain knowledge or estimation of the path cost to the goal. This includes:
+        <ul>
+          <li>**Breadth-First Search (BFS)**: Explores nodes layer by layer, guaranteeing the shortest path in terms of steps.</li>
+          <li>**Depth-First Search (DFS)**: Explores as far as possible along each branch before backtracking, and is generally more memory-efficient.</li>
+          <li>**Uniform Cost Search (UCS)**: Expands the node with the lowest path cost from the start, guaranteeing the optimal (cheapest) path.</li>
+          <li>**Iterative Deepening DFS (IDDFS)**: Combines the completeness of BFS with the low memory usage of DFS.</li>
+        </ul>
+      </li>
+      <li>**Informed Search**: Algorithms that use a **heuristic function** (an "educated guess" of the remaining cost to the goal) to guide the search. This includes:
+        <ul>
+          <li>**Greedy Best-First Search**: Prioritizes the node that appears closest to the goal (lowest heuristic value).</li>
+          <li>**A\* Search**: Combines the actual cost from the start ($g$) with the estimated cost to the goal ($h$), prioritizing the node with the lowest total estimated cost ($f = g + h$). It is guaranteed to find the **optimal path**.</li>
+        </ul>
+      </li>
+    </ul>
   </div>
 
-  <div id="map-container">
-    <svg id="map" width="600" height="500"></svg>
-  </div>
-
-  <div id="output" class="output"></div>
-
-  <script src="algorithm.js"></script>
-  <script src="script.js"></script>
 </body>
 </html>

@@ -2,7 +2,7 @@
   --bg: #0f172a;
   --text-color: #e2e8f0;
   --node-color: #38bdf8;      /* city circle color */
-  --line-color: #00ff7f;      /* animated path color (change this to match output) */
+  --line-color: #00ff7f;      /* animated path color */
   --path-text-color: #007bff; /* label color for Path: */
   --cost-color: #28a745;      /* label color for Cost: */
   --card-bg: #ffffff;         /* result card background */
@@ -22,17 +22,20 @@ body {
   color: var(--text-color);
 }
 
+/* --- Navigation & Header --- */
 nav {
   width: 100%;
   padding: 1rem 5%;
   background-color: rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(15px);
-  margin-bottom: 2rem;
-
+  /* Removed margin-bottom here to let .page-content control spacing */
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  position: sticky; /* Optional: Make navigation stick to the top */
+  top: 0;
+  z-index: 1000;
 }
 
 .logo {
@@ -54,11 +57,82 @@ nav {
   font-weight: 500;
   text-decoration: none;
   color: var(--text-color);
+  transition: color 0.2s;
 }
 
 .nav-links li a:hover {
   color: var(--node-color);
   text-shadow: 0 0 10px var(--node-color);
+}
+
+.nav-links li a.active {
+  color: var(--line-color);
+  font-weight: 700;
+  text-shadow: 0 0 10px var(--line-color);
+}
+
+/* --- General Page Content Layout --- */
+.page-content {
+  padding: 2rem 5%;
+  max-width: 900px;
+  margin: 2rem auto; /* Spacing below nav and centered */
+}
+
+.page-content h2 {
+  color: var(--node-color);
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+.page-content h3 {
+  color: var(--text-color);
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+}
+
+.page-content p, .page-content ul {
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.page-content ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 1rem;
+}
+
+.page-content ul li {
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.page-content ul li::before {
+  content: "•"; 
+  color: var(--line-color);
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+}
+
+.page-content a {
+  color: var(--line-color);
+  text-decoration: none;
+}
+
+.page-content a:hover {
+  text-decoration: underline;
+}
+
+/* --- Query Input/Chat Box (Maps Page) --- */
+.chat-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem; /* Applies specifically to Maps page input wrapper */
 }
 
 .input-wrapper {
@@ -109,13 +183,8 @@ nav {
   box-shadow: 0 0 15px var(--node-color);
 }
 
-.chat-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 2rem;
-}
 
+/* --- Map Visualization (Maps Page) --- */
 #map-container {
   display: flex;
   justify-content: center;
@@ -123,7 +192,7 @@ nav {
 }
 
 #map {
-    background: transparent;
+  background: transparent;
 }
 
 /* Node labels */
@@ -134,6 +203,15 @@ svg text {
   pointer-events: none;
 }
 
+/* Highlighted city on the path (JS will apply class by setting fill) */
+.city-highlight {
+  r: 8; 
+  stroke: #fff;
+  stroke-width: 1;
+}
+
+
+/* --- Output/Results Card --- */
 .output {
   margin: 2rem auto;
   padding: 1rem;
@@ -178,14 +256,15 @@ svg text {
   font-weight: bold;
 }
 
-/* Highlighted city on the path (JS will apply class by setting fill) */
-.city-highlight {
-  r: 8; /* not applied via CSS for SVG - JS changes radius */
-  stroke: #fff;
-  stroke-width: 1;
+/* --- Separator --- */
+hr {
+  border: 0;
+  height: 1px;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+  margin: 3rem 0;
 }
 
-/* small responsive tweak */
+/* --- Responsive Tweaks --- */
 @media (max-width: 700px){
   #map { width: 330px; height: 280px; }
   .input-wrapper { width: 90%; }
