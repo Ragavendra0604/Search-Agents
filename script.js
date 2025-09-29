@@ -8,7 +8,11 @@ function runQuery() {
   const input = document.getElementById("query").value.trim();
   const outputDiv = document.getElementById("output");
   const svg = document.getElementById("map");
+  
+  outputDiv.classList.remove("output-hidden");
+
   svg.innerHTML = ""; // clear old map
+
 
   const lower = input.toLowerCase();
 
