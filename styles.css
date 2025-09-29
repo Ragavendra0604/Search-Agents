@@ -1,0 +1,193 @@
+:root{
+  --bg: #0f172a;
+  --text-color: #e2e8f0;
+  --node-color: #38bdf8;      /* city circle color */
+  --line-color: #00ff7f;      /* animated path color (change this to match output) */
+  --path-text-color: #007bff; /* label color for Path: */
+  --cost-color: #28a745;      /* label color for Cost: */
+  --card-bg: #ffffff;         /* result card background */
+  --card-text: #111827;
+  --error-color: #dc3545;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background: var(--bg);
+  color: var(--text-color);
+}
+
+nav {
+  width: 100%;
+  padding: 1rem 5%;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(15px);
+  margin-bottom: 2rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--node-color);
+  letter-spacing: 1px;
+  margin-right: auto;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-links li a {
+  font-size: 1.05rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--text-color);
+}
+
+.nav-links li a:hover {
+  color: var(--node-color);
+  text-shadow: 0 0 10px var(--node-color);
+}
+
+.input-wrapper {
+  position: relative;
+  width: 70%;
+  max-width: 600px;
+}
+
+.chat-input {
+  width: 100%;
+  padding: 0.8rem 3rem 0.8rem 1rem;
+  border: none;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-color);
+  font-size: 1rem;
+  outline: none;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.chat-input:focus {
+  border: 1px solid var(--node-color);
+  box-shadow: 0 0 8px var(--node-color);
+}
+
+.send-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--node-color);
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-color);
+  font-size: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.send-btn:hover {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 0 15px var(--node-color);
+}
+
+.chat-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+#map-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+#map {
+    background: transparent;
+}
+
+/* Node labels */
+svg text {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  fill: var(--text-color);
+  pointer-events: none;
+}
+
+.output {
+  margin: 2rem auto;
+  padding: 1rem;
+  width: 70%;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  color: var(--text-color);
+  font-size: 1rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  backdrop-filter: blur(10px);
+}
+
+.result-card {
+  padding: 12px 15px;
+  background: var(--card-bg);
+  color: var(--card-text);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  border-left: 5px solid var(--node-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.result-card p {
+  margin: 6px 0;
+  font-size: 15px;
+}
+
+.path {
+  font-weight: bold;
+  color: var(--path-text-color);
+}
+
+.cost {
+  color: var(--cost-color);
+  font-weight: bold;
+}
+
+.error {
+  color: var(--error-color);
+  font-weight: bold;
+}
+
+/* Highlighted city on the path (JS will apply class by setting fill) */
+.city-highlight {
+  r: 8; /* not applied via CSS for SVG - JS changes radius */
+  stroke: #fff;
+  stroke-width: 1;
+}
+
+/* small responsive tweak */
+@media (max-width: 700px){
+  #map { width: 330px; height: 280px; }
+  .input-wrapper { width: 90%; }
+  .output { width: 92%; }
+}
