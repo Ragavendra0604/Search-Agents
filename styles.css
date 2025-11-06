@@ -226,6 +226,10 @@ svg text {
   backdrop-filter: blur(10px);
 }
 
+.output-hidden {
+    display: none;
+}
+
 .result-card {
   padding: 12px 15px;
   background: var(--card-bg);
@@ -254,6 +258,17 @@ svg text {
 .error {
   color: var(--error-color);
   font-weight: bold;
+}
+
+.map-image {
+  display:  flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aligncenter {
+  padding: 10px;
+  text-align: center;
 }
 
 /* --- Separator --- */
