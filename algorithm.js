@@ -22,6 +22,7 @@ const graph = {
   Neamt: [{ node: "Iasi", cost: 87 }]
 };
 
+// Heuristics (Straight-line distance to Bucharest)
 const heuristics = {
   Arad: 366, Bucharest: 0, Craiova: 160, Drobeta: 242, Eforie: 161, Fagaras: 176,
   Giurgiu: 77, Hirsova: 151, Iasi: 226, Lugoj: 244, Mehadia: 241, Neamt: 234,
@@ -38,79 +39,148 @@ const coordinates = {
   Eforie: [480, 260], Vaslui: [420, 150], Iasi: [440, 100], Neamt: [410, 60]
 };
 
+
+// Gets the cost between two *directly connected* cities
+function getCost(city1, city2) {
+  const neighbors = graph[city1];
+  if (!neighbors) return 0;
+  const connection = neighbors.find(n => n.node === city2);
+  return connection ? connection.cost : 0;
+}
+
+// Calculates the total cost of a path (an array of cities)
+function calculateCost(path) {
+  let cost = 0;
+  for (let i = 0; i < path.length - 1; i++) {
+    cost += getCost(path[i], path[i + 1]);
+  }
+  return cost;
+}
+
 // ---------- UnInformed ----------
 
-// BFS
+// BFS (Finds path with fewest *steps*)
 function bfs(start, goal) {
-  let queue = [[start]];
-  let visited = new Set();
+  let queue = [[start]]; // Queue stores paths (arrays of cities)
+  let visited = new Set([start]); // Track visited nodes
 
   while (queue.length) {
     let path = queue.shift();
     let node = path[path.length - 1];
-    if (node === goal) return { path, cost: path.length - 1 };
 
-    if (!visited.has(node)) {
-      visited.add(node);
-      for (let neighbor of graph[node]) {
-        queue.push([...path, neighbor.node]);
+    if (node === goal) {
+      // Found the goal, return the path and its *actual* cost
+      return { path, cost: calculateCost(path) };
+    }
+
+    for (let neighbor of graph[node]) {
+      if (!visited.has(neighbor.node)) {
+        visited.add(neighbor.node);
+        let newPath = [...path, neighbor.node];
+        queue.push(newPath);
+      }
+    }
+  }
+  return null; // No path found
+}
+
+// DFS (Finds *a* path, not optimal) - Iterative version
+function dfs(start, goal) {
+  let stack = [[start]]; // Stack stores paths
+  let visited = new Set(); // Track visited nodes to avoid cycles
+
+  while (stack.length) {
+    let path = stack.pop();
+    let node = path[path.length - 1];
+
+    if (visited.has(node)) {
+        continue;
+    }
+    visited.add(node);
+
+    if (node === goal) {
+      return { path, cost: calculateCost(path) };
+    }
+
+    // Add neighbors to stack in reverse order to explore them alphabetically (optional, but consistent)
+    const neighbors = graph[node] || [];
+    for (let i = neighbors.length - 1; i >= 0; i--) {
+        const neighbor = neighbors[i];
+        if (!visited.has(neighbor.node)) {
+            let newPath = [...path, neighbor.node];
+            stack.push(newPath);
+        }
+    }
+  }
+  return null;
+}
+
+// UCS (Finds the *cheapest* path)
+function ucs(start, goal) {
+  // Priority queue stores [cost, path]
+  let pq = [[0, [start]]];
+  // minCosts stores the cheapest cost found *so far* to reach a node
+  let minCosts = new Map();
+  minCosts.set(start, 0);
+
+  while (pq.length) {
+    // Sort to simulate a min-priority queue (inefficient, but works)
+    pq.sort((a, b) => a[0] - b[0]);
+    
+    let [cost, path] = pq.shift();
+    let node = path[path.length - 1];
+
+    // If this path is already more expensive than the cheapest path we found
+    // to this node, skip it.
+    if (cost > minCosts.get(node)) {
+      continue;
+    }
+
+    if (node === goal) {
+      return { path, cost };
+    }
+
+    for (let neighbor of graph[node]) {
+      let newCost = cost + neighbor.cost;
+
+      // If we've never seen this neighbor, or we found a *new cheaper* path
+      // to it, add it to the queue and update its min cost.
+      if (!minCosts.has(neighbor.node) || newCost < minCosts.get(neighbor.node)) {
+        minCosts.set(neighbor.node, newCost);
+        let newPath = [...path, neighbor.node];
+        pq.push([newCost, newPath]);
       }
     }
   }
   return null;
 }
 
-// DFS
-function dfs(start, goal, visited = new Set(), path = []) {
-  path.push(start);
-  if (start === goal) return { path, cost: path.length - 1 };
-  visited.add(start);
-
-  for (let neighbor of graph[start]) {
-    if (!visited.has(neighbor.node)) {
-      let newPath = dfs(neighbor.node, goal, visited, [...path]);
-      if (newPath) return newPath;
+// IDDFS (Iterative Deepening DFS)
+function iddfs(start, goal, maxDepth = 20) {
+  // DLS: Depth-Limited Search
+  function dls(node, goal, depth, path) {
+    if (node === goal) {
+      // Found the goal, return path and its calculated cost
+      return { path, cost: calculateCost(path) };
     }
-  }
-  return null;
-}
-
-// UCS
-function ucs(start, goal) {
-  let pq = [[0, [start]]];
-
-  while (pq.length) {
-    pq.sort((a, b) => a[0] - b[0]);
-    let [cost, path] = pq.shift();
-    let node = path[path.length - 1];
-
-    if (node === goal) return { path, cost };
+    if (depth <= 0) {
+      return null;
+    }
 
     for (let neighbor of graph[node]) {
-      pq.push([cost + neighbor.cost, [...path, neighbor.node]]);
-    }
-  }
-  return null;
-}
-
-// IDDFS
-function iddfs(start, goal, maxDepth = 20) {
-  function dls(node, goal, depth, path, visited) {
-    if (depth === 0 && node === goal) return { path, cost: path.length - 1 };
-    if (depth > 0) {
-      visited.add(node);
-      for (let neighbor of graph[node]) {
-        if (!visited.has(neighbor.node)) {
-          let newPath = dls(neighbor.node, goal, depth - 1, [...path, neighbor.node], visited);
-          if (newPath) return newPath;
-        }
+      // Avoid cycles *within the current path*
+      if (!path.includes(neighbor.node)) {
+        let newPath = [...path, neighbor.node];
+        let result = dls(neighbor.node, goal, depth - 1, newPath);
+        if (result) return result;
       }
     }
     return null;
   }
 
+  // Iteratively increase the depth limit
   for (let depth = 0; depth <= maxDepth; depth++) {
-    let result = dls(start, goal, depth, [start], new Set());
+    let result = dls(start, goal, depth, [start]);
     if (result) return result;
   }
   return null;
@@ -118,45 +188,96 @@ function iddfs(start, goal, maxDepth = 20) {
 
 // ---------- Informed ----------
 
-// Greedy
+// Greedy Best-First (Finds path based on heuristic, not optimal)
 function greedy(start, goal) {
+  // Priority queue stores [heuristic_cost, path]
   let pq = [[heuristics[start], [start]]];
+  let visited = new Set(); // Avoid re-exploring nodes
 
   while (pq.length) {
+    // Sort by heuristic cost (h)
     pq.sort((a, b) => a[0] - b[0]);
+
     let [h, path] = pq.shift();
     let node = path[path.length - 1];
 
-    if (node === goal) return { path, cost: path.length - 1 };
+    if (visited.has(node)) {
+      continue;
+    }
+    visited.add(node);
+
+    if (node === goal) {
+      // Found path, return it and its *actual* cost (not heuristic cost)
+      return { path, cost: calculateCost(path) };
+    }
 
     for (let neighbor of graph[node]) {
-      pq.push([heuristics[neighbor.node], [...path, neighbor.node]]);
+      if (!visited.has(neighbor.node)) {
+        let newPath = [...path, neighbor.node];
+        pq.push([heuristics[neighbor.node], newPath]);
+      }
     }
   }
   return null;
 }
 
-// A*
+// A* (Finds the *cheapest* path using heuristics)
 function astar(start, goal) {
+  // Priority queue stores [f_cost, g_cost, path]
+  // f = g + h (total estimated cost)
+  // g = actual cost from start
   let pq = [[heuristics[start], 0, [start]]];
 
+  // minCosts stores the cheapest *actual* cost (g) found so far to reach a node
+  let minCosts = new Map();
+  minCosts.set(start, 0);
+
   while (pq.length) {
+    // Sort by f_cost (g + h)
     pq.sort((a, b) => a[0] - b[0]);
+
     let [f, g, path] = pq.shift();
     let node = path[path.length - 1];
 
-    if (node === goal) return { path, cost: g };
+    // If the *actual* cost (g) of this path is already worse than the
+    // cheapest path we've found to this node, skip it.
+    if (g > minCosts.get(node)) {
+      continue;
+    }
+
+    if (node === goal) {
+      return { path, cost: g }; // Return path and its actual cost (g)
+    }
 
     for (let neighbor of graph[node]) {
-      let newG = g + neighbor.cost;
-      let newF = newG + heuristics[neighbor.node];
-      pq.push([newF, newG, [...path, neighbor.node]]);
+      let newG = g + neighbor.cost; // New *actual* cost
+
+      // If we've never seen this neighbor, or we found a *new cheaper* path to it...
+      if (!minCosts.has(neighbor.node) || newG < minCosts.get(neighbor.node)) {
+        minCosts.set(neighbor.node, newG); // Update its minimum cost
+        let newH = heuristics[neighbor.node];
+        let newF = newG + newH; // Calculate new total estimated cost
+        let newPath = [...path, neighbor.node];
+        pq.push([newF, newG, newPath]);
+      }
     }
   }
   return null;
 }
 
-// AO* Placeholder
+// AO*
 function aoStar(start, goal) {
-  return ["AO*", "is typically used on AND-OR graphs (not plain maps).", "Implementation placeholder."];
+  // AO* is a specialized algorithm for AND-OR graphs, not simple pathfinding graphs.
+  // An AND-OR graph represents problems that can be broken into subproblems,
+  // where you might need to solve *all* subproblems (an AND node) or
+  // just *one* of them (an OR node).
+  //
+  // This Romania map is a standard graph (all OR nodes - you can go to
+  // Sibiu OR Timisoara OR Zerind).
+  // Therefore, AO* is not applicable to this problem.
+  return [
+    "AO* Algorithm",
+    "This algorithm is not applicable to this type of graph.",
+    "AO* is designed for AND-OR graphs, which represent problems with sub-problems (e.g., game trees or logic puzzles), not for standard pathfinding."
+  ];
 }
